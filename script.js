@@ -23,6 +23,8 @@ function draw3dCube(){
   var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
 
   cube = new THREE.Mesh( geometry, material );
+  cubePoint = new THREE.Vector3(0,-1,0);
+  cube.position = cubePoint;
 
   scene.add( cube );
   camera.position.z = 5;
@@ -33,6 +35,8 @@ function draw3dCube(){
 function update(){
   camera.position.x = Math.sin(cnt) * orbitRadius;
   camera.position.z = Math.cos(cnt) * orbitRadius;
+  camera.position.y = Math.sin(cnt) * orbitRadius;
+  camera.lookAt(cubePoint);
   cnt += 0.01;
 }
 
