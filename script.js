@@ -19,18 +19,25 @@ function draw3dCube(){
   renderer.setSize( WIDTH, HEIGHT);
   document.body.appendChild( renderer.domElement );
 
+
   var geometry = new THREE.BoxGeometry( 1, 1, 1 );
   var material = new THREE.MeshLambertMaterial( { color: 0xffffff } );
 
   var directionalLight = new THREE.DirectionalLight( 0xfffff ,2.0);
   directionalLight.position.set(1,3,1);
 
+  var groundGemetry = new THREE.PlaneGeometry(10,10);
+  ground = new THREE.Mesh(groundGemetry, material);
+
+  ground.rotateX(-Math.PI * 0.5);
+  ground.position.set(0,-0.5,0);
 
   cube = new THREE.Mesh( geometry, material );
   cubePoint = new THREE.Vector3(0,0,0);
   cube.position = cubePoint;
 
   scene.add( cube );
+  scene.add(ground);
   scene.add(directionalLight);
 
 
