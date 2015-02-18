@@ -7,27 +7,39 @@ var renderer = new THREE.WebGLRenderer();
 var cnt  = 0,
     orbitRadius = 5,
     isRunning = true,
-    cubes = []
+    fallingCubes = [],
+    player
 ;
 
 function main(){
-  document.body.onkeydown = onkeydown; 
+  document.body.onkeypress = onkeydown; 
   init();
   render();
 }
 
 function addCube(position,geometry,material){
-    var cube =  new THREE.Mesh( geometry, material );
-    scene.add(cube);
-    cubes.push(cube);
-    cube.position.x = position.x;
-    cube.position.y = position.y;
-    cube.position.z = position.z;
+  var cube =  new THREE.Mesh( geometry, material );
+  scene.add(cube);
+  cube.position.x = position.x;
+  cube.position.y = position.y;
+  cube.position.z = position.z;
+  return cube;
 }
 
+function addFallingCube(geometry,material){
+  var position = generateRandomPosition();
+  var cube =  new THREE.Mesh( geometry, material );
+  scene.add(cube);
+  fallingCubes.push(cube);
+  cube.position.x = position.x;
+  cube.position.y = position.y;
+  cube.position.z = position.z;
+}
+
+
 function generateRandomPosition(){
- var min = -4, max = 4;
- return new THREE.Vector3(rand(),rand(),rand());
+  var min = -4, max = 4;
+  return new THREE.Vector3(rand(),rand(),rand());
   function rand(){
     return Math.random()*(max-min)+ min;
   }
@@ -49,7 +61,12 @@ function init(){
   ground.rotateX(-Math.PI * 0.5);
   ground.position.set(0,-0.5,0);
 
-  for(i = 0;i < 20;i ++)addCube(generateRandomPosition(),geometry,material);
+  for(i = 0;i < 20;i ++)addFallingCube(geometry,material);
+
+  playerMaterial =new THREE.MeshLambertMaterial( { color: 0x00ff00 } );
+  player = new THREE.Mesh(geometry,playerMaterial);
+  scene.add(player);
+
 
   lookat= new THREE.Vector3(0,0,0);
 
@@ -66,8 +83,8 @@ function update(){
   camera.position.y = Math.abs(Math.sin(cnt) * 0.5 * orbitRadius);
   camera.lookAt(lookat);
 
-  for(i = 0; i < cubes.length ; i++){
-    var cube = cubes[i];
+  for(i = 0; i < fallingCubes.length ; i++){
+    var cube = fallingCubes[i];
     cube.position.y -= 0.05;
     if(cube.position.y < -1)cube.position.y = 5;
   }
@@ -85,6 +102,18 @@ function onkeydown(e){
   switch (e.keyCode){
     case 32:
     isRunning = !isRunning;
+    break;
+    case 37:
+    player.position.x += 0.5; 
+    break;
+    case 39:
+    player.position.x +D= 0.5; 
+    break;
+    case 38:
+    player.position.z += 0.5; 
+    break;
+    case 40:
+    player.position.z -= 0.5; 
     break;
     default : 
     console.log(e.keyCode);
