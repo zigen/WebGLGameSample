@@ -16,6 +16,23 @@ function main(){
   render();
 }
 
+function addCube(position,geometry,material){
+    var cube =  new THREE.Mesh( geometry, material );
+    scene.add(cube);
+    cubes.push(cube);
+    cube.position.x = position.x;
+    cube.position.y = position.y;
+    cube.position.z = position.z;
+}
+
+function generateRandomPosition(){
+ var min = -4, max = 4;
+ return new THREE.Vector3(rand(),rand(),rand());
+  function rand(){
+    return Math.random()*(max-min)+ min;
+  }
+}
+
 function init(){
   renderer.setSize( WIDTH, HEIGHT);
   document.body.appendChild( renderer.domElement );
@@ -32,18 +49,10 @@ function init(){
   ground.rotateX(-Math.PI * 0.5);
   ground.position.set(0,-0.5,0);
 
-  for(i = 0; i < 10; i++){
-    var cube =  new THREE.Mesh( geometry, material );
-    cube.position.x = i;
-    cube.position.z = i;
-    cube.position.y = i*0.2;
-    cubes.push(cube);
-  }
+  for(i = 0;i < 20;i ++)addCube(generateRandomPosition(),geometry,material);
+
   lookat= new THREE.Vector3(0,0,0);
 
-  for(i = 0; i < 10; i++){
-    scene.add(cubes[i]);
-  }
   scene.add(ground);
   scene.add(light);
   camera.position.z = 5;
@@ -57,7 +66,7 @@ function update(){
   camera.position.y = Math.abs(Math.sin(cnt) * 0.5 * orbitRadius);
   camera.lookAt(lookat);
 
-  for(i = 0; i < 10; i++){
+  for(i = 0; i < cubes.length ; i++){
     var cube = cubes[i];
     cube.position.y -= 0.05;
     if(cube.position.y < -1)cube.position.y = 5;
