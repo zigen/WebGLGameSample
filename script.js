@@ -7,7 +7,7 @@ var renderer = new THREE.WebGLRenderer();
 
 var cnt  = 0,
     orbitRadius = 5,
-    isRunning = false;
+    isRunning = true;
 
 function main(){
   document.body.onkeydown = onkeydown; 
@@ -33,8 +33,7 @@ function init(){
   ground.position.set(0,-0.5,0);
 
   cube = new THREE.Mesh( geometry, material );
-  cubePoint = new THREE.Vector3(0,0,0);
-  cube.position = cubePoint;
+  lookat= new THREE.Vector3(0,0,0);
 
   scene.add( cube );
   scene.add(ground);
@@ -48,7 +47,10 @@ function update(){
   camera.position.x = Math.sin(cnt) * orbitRadius;
   camera.position.z = Math.cos(cnt) * orbitRadius;
   camera.position.y = Math.abs(Math.sin(cnt) * 0.5 * orbitRadius);
-  camera.lookAt(cubePoint);
+  camera.lookAt(lookat);
+
+  cube.position.y -= 0.05;
+  if(cube.position.y < -1)cube.position.y = 5;
   cnt += 0.01;
 }
 
@@ -59,6 +61,7 @@ function render(){
 }
 
 function onkeydown(e){
+ e.preventDefault();
  switch (e.keyCode){
     case 32:
       isRunning = !isRunning;
