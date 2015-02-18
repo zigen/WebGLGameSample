@@ -10,11 +10,14 @@ var cnt  = 0,
     fallingCubes = [],
     player,
     RED = new THREE.Color(1,0,0),
-    GREEN = new THREE.Color(0,1,0)
+    GREEN = new THREE.Color(0,1,0),
+    point = 0,
+    pointView
 ;
 
 function main(){
   document.body.onkeydown = onkeydown; 
+  pointView = document.getElementById('point'); 
   init();
   render();
 }
@@ -47,6 +50,10 @@ function isHit(cube1,cube2,cubeLength){
     return true;
   }
   return false;
+}
+
+function updatePointView(){
+  pointView.innerHTML = point + " hit";
 }
 
 function respawn(cube){
@@ -109,10 +116,11 @@ function update(){
     if(isHit(player,cube,1)){
       cube.material.color = RED;
       cube.userData.hit = true;
-      isRunning = false;
+      point++;
     }
     if(cube.position.y < -1)respawn(cube);
   }
+  updatePointView();
   cnt += 0.01;
 }
 
