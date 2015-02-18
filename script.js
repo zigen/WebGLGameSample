@@ -5,7 +5,7 @@ var camera = new THREE.PerspectiveCamera( 75, WIDTH/HEIGHT, 0.1, 1000 );
 var renderer = new THREE.WebGLRenderer();
 
 var cnt  = 0,
-    orbitRadius = 5,
+    orbitRadius = 7,
     isRunning = true,
     fallingCubes = [],
     player,
@@ -14,7 +14,7 @@ var cnt  = 0,
 ;
 
 function main(){
-  document.body.onkeypress = onkeydown; 
+  document.body.onkeydown = onkeydown; 
   init();
   render();
 }
@@ -31,6 +31,7 @@ function addCube(position,geometry,material){
 function addFallingCube(geometry,material){
   var position = generateRandomPosition();
   var cube =  new THREE.Mesh( geometry, material.clone() );
+  cube.userData.hit = false;
   scene.add(cube);
   fallingCubes.push(cube);
   cube.position.x = position.x;
@@ -39,10 +40,22 @@ function addFallingCube(geometry,material){
 }
 
 function isHit(cube1,cube2,cubeLength){
+  if(cube2.userData.hit)return false;
   if(Math.abs(cube1.position.y - cube2.position.y) < cubeLength &&
     Math.abs(cube1.position.x - cube2.position.x) < cubeLength &&
-    Math.abs(cube1.position.z - cube2.position.z) < cubeLength)return true;
+    Math.abs(cube1.position.z - cube2.position.z) < cubeLength){
+    return true;
+  }
   return false;
+}
+
+function respawn(cube){
+  cube.userData.hit = false;
+  var pos = generateRandomPosition();
+  cube.position.x = pos.x;
+  cube.position.y = 5;
+  cube.position.z = pos.z;
+  cube.material.color = GREEN;
 }
 
 function generateRandomPosition(){
@@ -93,9 +106,12 @@ function update(){
   for(i = 0; i < fallingCubes.length ; i++){
     var cube = fallingCubes[i];
     cube.position.y -= 0.05;
-    if(isHit(player,cube,1))cube.material.color = RED;
-    else cube.material.color = GREEN;
-    if(cube.position.y < -1)cube.position.y = 5;
+    if(isHit(player,cube,1)){
+      cube.material.color = RED;
+      cube.userData.hit = true;
+      isRunning = false;
+    }
+    if(cube.position.y < -1)respawn(cube);
   }
   cnt += 0.01;
 }
