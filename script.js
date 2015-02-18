@@ -20,13 +20,20 @@ function draw3dCube(){
   document.body.appendChild( renderer.domElement );
 
   var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-  var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+  var material = new THREE.MeshLambertMaterial( { color: 0xffffff } );
+
+  var directionalLight = new THREE.DirectionalLight( 0xfffff ,2.0);
+  directionalLight.position.set(1,3,1);
+
 
   cube = new THREE.Mesh( geometry, material );
-  cubePoint = new THREE.Vector3(0,-1,0);
+  cubePoint = new THREE.Vector3(0,0,0);
   cube.position = cubePoint;
 
   scene.add( cube );
+  scene.add(directionalLight);
+
+
   camera.position.z = 5;
 
   render();
@@ -35,7 +42,7 @@ function draw3dCube(){
 function update(){
   camera.position.x = Math.sin(cnt) * orbitRadius;
   camera.position.z = Math.cos(cnt) * orbitRadius;
-  camera.position.y = Math.sin(cnt) * orbitRadius;
+  camera.position.y = Math.sin(cnt) * 0.5 * orbitRadius;
   camera.lookAt(cubePoint);
   cnt += 0.01;
 }
