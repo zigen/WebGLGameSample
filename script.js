@@ -8,7 +8,9 @@ var cnt  = 0,
     orbitRadius = 5,
     isRunning = true,
     fallingCubes = [],
-    player
+    player,
+    RED = new THREE.Color(1,0,0),
+    GREEN = new THREE.Color(0,1,0)
 ;
 
 function main(){
@@ -18,7 +20,7 @@ function main(){
 }
 
 function addCube(position,geometry,material){
-  var cube =  new THREE.Mesh( geometry, material );
+  var cube =  new THREE.Mesh( geometry, material.clone() );
   scene.add(cube);
   cube.position.x = position.x;
   cube.position.y = position.y;
@@ -28,7 +30,7 @@ function addCube(position,geometry,material){
 
 function addFallingCube(geometry,material){
   var position = generateRandomPosition();
-  var cube =  new THREE.Mesh( geometry, material );
+  var cube =  new THREE.Mesh( geometry, material.clone() );
   scene.add(cube);
   fallingCubes.push(cube);
   cube.position.x = position.x;
@@ -36,6 +38,12 @@ function addFallingCube(geometry,material){
   cube.position.z = position.z;
 }
 
+function isHit(cube1,cube2,cubeLength){
+  if(Math.abs(cube1.position.y - cube2.position.y) < cubeLength &&
+    Math.abs(cube1.position.x - cube2.position.x) < cubeLength &&
+    Math.abs(cube1.position.z - cube2.position.z) < cubeLength)return true;
+  return false;
+}
 
 function generateRandomPosition(){
   var min = -4, max = 4;
@@ -63,10 +71,9 @@ function init(){
 
   for(i = 0;i < 20;i ++)addFallingCube(geometry,material);
 
-  playerMaterial =new THREE.MeshLambertMaterial( { color: 0x00ff00 } );
+  playerMaterial =new THREE.MeshLambertMaterial( { color: 0x0000ff } );
   player = new THREE.Mesh(geometry,playerMaterial);
   scene.add(player);
-
 
   lookat= new THREE.Vector3(0,0,0);
 
@@ -86,6 +93,8 @@ function update(){
   for(i = 0; i < fallingCubes.length ; i++){
     var cube = fallingCubes[i];
     cube.position.y -= 0.05;
+    if(isHit(player,cube,1))cube.material.color = RED;
+    else cube.material.color = GREEN;
     if(cube.position.y < -1)cube.position.y = 5;
   }
   cnt += 0.01;
@@ -107,7 +116,7 @@ function onkeydown(e){
     player.position.x += 0.5; 
     break;
     case 39:
-    player.position.x +D= 0.5; 
+    player.position.x -= 0.5; 
     break;
     case 38:
     player.position.z += 0.5; 
