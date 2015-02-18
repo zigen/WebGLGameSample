@@ -6,25 +6,25 @@ var camera = new THREE.PerspectiveCamera( 75, WIDTH/HEIGHT, 0.1, 1000 );
 var renderer = new THREE.WebGLRenderer();
 
 var cnt  = 0,
-    orbitRadius = 5;
+    orbitRadius = 5,
+    isRunning = false;
 
 function main(){
-  console.log("Hello world from javascript");
-  draw3dCube();
+  document.body.onkeydown = onkeydown; 
+  init();
+  render();
 }
 
 
-function draw3dCube(){
-
+function init(){
   renderer.setSize( WIDTH, HEIGHT);
   document.body.appendChild( renderer.domElement );
-
 
   var geometry = new THREE.BoxGeometry( 1, 1, 1 );
   var material = new THREE.MeshLambertMaterial( { color: 0xffffff } );
 
-  var directionalLight = new THREE.DirectionalLight( 0xfffff ,2.0);
-  directionalLight.position.set(1,3,1);
+  var light  = new THREE.DirectionalLight( 0xffffff ,1.0);
+  light.position.set(1,3,1);
 
   var groundGemetry = new THREE.PlaneGeometry(10,10);
   ground = new THREE.Mesh(groundGemetry, material);
@@ -38,25 +38,32 @@ function draw3dCube(){
 
   scene.add( cube );
   scene.add(ground);
-  scene.add(directionalLight);
-
-
+  scene.add(light);
   camera.position.z = 5;
 
-  render();
 }
 
 function update(){
+  if(!isRunning)return ;
   camera.position.x = Math.sin(cnt) * orbitRadius;
   camera.position.z = Math.cos(cnt) * orbitRadius;
-  camera.position.y = Math.sin(cnt) * 0.5 * orbitRadius;
+  camera.position.y = Math.abs(Math.sin(cnt) * 0.5 * orbitRadius);
   camera.lookAt(cubePoint);
   cnt += 0.01;
 }
 
 function render(){
-update();
- requestAnimationFrame( render );
- renderer.render( scene, camera );
+  update();
+  requestAnimationFrame( render );
+  renderer.render( scene, camera );
 }
 
+function onkeydown(e){
+ switch (e.keyCode){
+    case 32:
+      isRunning = !isRunning;
+      break;
+    default : 
+      console.log(e.keyCode);
+  }
+}
