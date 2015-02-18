@@ -1,4 +1,3 @@
-
 var WIDTH = 640,
     HEIGHT = 480;
 var scene = new THREE.Scene();
@@ -7,14 +6,15 @@ var renderer = new THREE.WebGLRenderer();
 
 var cnt  = 0,
     orbitRadius = 5,
-    isRunning = true;
+    isRunning = true,
+    cubes = []
+;
 
 function main(){
   document.body.onkeydown = onkeydown; 
   init();
   render();
 }
-
 
 function init(){
   renderer.setSize( WIDTH, HEIGHT);
@@ -32,10 +32,18 @@ function init(){
   ground.rotateX(-Math.PI * 0.5);
   ground.position.set(0,-0.5,0);
 
-  cube = new THREE.Mesh( geometry, material );
+  for(i = 0; i < 10; i++){
+    var cube =  new THREE.Mesh( geometry, material );
+    cube.position.x = i;
+    cube.position.z = i;
+    cube.position.y = i*0.2;
+    cubes.push(cube);
+  }
   lookat= new THREE.Vector3(0,0,0);
 
-  scene.add( cube );
+  for(i = 0; i < 10; i++){
+    scene.add(cubes[i]);
+  }
   scene.add(ground);
   scene.add(light);
   camera.position.z = 5;
@@ -49,8 +57,11 @@ function update(){
   camera.position.y = Math.abs(Math.sin(cnt) * 0.5 * orbitRadius);
   camera.lookAt(lookat);
 
-  cube.position.y -= 0.05;
-  if(cube.position.y < -1)cube.position.y = 5;
+  for(i = 0; i < 10; i++){
+    var cube = cubes[i];
+    cube.position.y -= 0.05;
+    if(cube.position.y < -1)cube.position.y = 5;
+  }
   cnt += 0.01;
 }
 
@@ -61,12 +72,12 @@ function render(){
 }
 
 function onkeydown(e){
- e.preventDefault();
- switch (e.keyCode){
+  e.preventDefault();
+  switch (e.keyCode){
     case 32:
-      isRunning = !isRunning;
-      break;
+    isRunning = !isRunning;
+    break;
     default : 
-      console.log(e.keyCode);
+    console.log(e.keyCode);
   }
 }
