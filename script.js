@@ -62,8 +62,11 @@ function init(){
   ground.position.set(0,-0.5,0);
 
 
-
   lookat= new THREE.Vector3(0,0,0);
+
+  addCube({x:0,y:1,z:0},geometry, material);
+  addCube(new THREE.Vector3(1.5, 0.50,0),geometry, material);
+  
 
   scene.add(ground);
   scene.add(light);
