@@ -5,13 +5,15 @@ var camera = new THREE.PerspectiveCamera( 75, WIDTH/HEIGHT, 0.1, 1000 );
 var renderer = new THREE.WebGLRenderer();
 
 var cnt  = 0,
-    orbitRadius = 7,
+    orbitRadius = 9,
     isRunning = true,
     fallingCubes = [],
     player,
     RED = new THREE.Color(1,0,0),
     GREEN = new THREE.Color(0,1,0),
     point = 0,
+    cubeSize = 1,
+    cubeMargin = 0.2,
     pointView
 ;
 
@@ -22,7 +24,7 @@ function main(){
   render();
 }
 
-  
+
 
 function addCube(position,geometry,material){
   var cube =  new THREE.Mesh( geometry, material.clone() );
@@ -46,6 +48,22 @@ function respawn(cube){
   cube.material.color = GREEN;
 }
 
+function addCubes(positions, geometry, material){
+  var cubes = [];
+  var unitLength = cubeMargin + cubeSize;
+  for(i in positions){
+    var pos = positions[i];
+    var x = pos[0] * unitLength;
+    var y = pos[1] * unitLength;
+    console.log(x,y);
+    cubes.push( addCube(
+      {x:x, y:y, z:1},
+        geometry, material));
+  }
+  console.log(cubes);
+  return cubes;
+}
+
 function init(){
   renderer.setSize( WIDTH, HEIGHT);
   document.body.appendChild( renderer.domElement );
@@ -64,9 +82,12 @@ function init(){
 
   lookat= new THREE.Vector3(0,0,0);
 
-  addCube({x:0,y:1,z:0},geometry, material);
-  addCube(new THREE.Vector3(1.5, 0.50,0),geometry, material);
-  
+  addCubes([
+      [1,1],
+      [3,2],
+      [2,3],
+      [1,4]
+  ],geometry, material);
 
   scene.add(ground);
   scene.add(light);
