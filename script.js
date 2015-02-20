@@ -22,6 +22,8 @@ function main(){
   render();
 }
 
+  
+
 function addCube(position,geometry,material){
   var cube =  new THREE.Mesh( geometry, material.clone() );
   scene.add(cube);
@@ -29,27 +31,6 @@ function addCube(position,geometry,material){
   cube.position.y = position.y;
   cube.position.z = position.z;
   return cube;
-}
-
-function addFallingCube(geometry,material){
-  var position = generateRandomPosition();
-  var cube =  new THREE.Mesh( geometry, material.clone() );
-  cube.userData.hit = false;
-  scene.add(cube);
-  fallingCubes.push(cube);
-  cube.position.x = position.x;
-  cube.position.y = position.y;
-  cube.position.z = position.z;
-}
-
-function isHit(cube1,cube2,cubeLength){
-  if(cube2.userData.hit)return false;
-  if(Math.abs(cube1.position.y - cube2.position.y) < cubeLength &&
-    Math.abs(cube1.position.x - cube2.position.x) < cubeLength &&
-    Math.abs(cube1.position.z - cube2.position.z) < cubeLength){
-    return true;
-  }
-  return false;
 }
 
 function updatePointView(){
@@ -65,14 +46,6 @@ function respawn(cube){
   cube.material.color = GREEN;
 }
 
-function generateRandomPosition(){
-  var min = -4, max = 4;
-  return new THREE.Vector3(rand(),rand(),rand());
-  function rand(){
-    return Math.random()*(max-min)+ min;
-  }
-}
-
 function init(){
   renderer.setSize( WIDTH, HEIGHT);
   document.body.appendChild( renderer.domElement );
@@ -85,15 +58,10 @@ function init(){
 
   var groundGemetry = new THREE.PlaneGeometry(10,10);
   ground = new THREE.Mesh(groundGemetry, material);
-
   ground.rotateX(-Math.PI * 0.5);
   ground.position.set(0,-0.5,0);
 
-  for(i = 0;i < 20;i ++)addFallingCube(geometry,material);
 
-  playerMaterial =new THREE.MeshLambertMaterial( { color: 0x0000ff } );
-  player = new THREE.Mesh(geometry,playerMaterial);
-  scene.add(player);
 
   lookat= new THREE.Vector3(0,0,0);
 
@@ -110,16 +78,7 @@ function update(){
   camera.position.y = Math.abs(Math.sin(cnt) * 0.5 * orbitRadius);
   camera.lookAt(lookat);
 
-  for(i = 0; i < fallingCubes.length ; i++){
-    var cube = fallingCubes[i];
-    cube.position.y -= 0.05;
-    if(isHit(player,cube,1)){
-      cube.material.color = RED;
-      cube.userData.hit = true;
-      point++;
-    }
-    if(cube.position.y < -1)respawn(cube);
-  }
+
   updatePointView();
   cnt += 0.01;
 }
@@ -131,22 +90,18 @@ function render(){
 }
 
 function onkeydown(e){
-  e.preventDefault();
   switch (e.keyCode){
     case 32:
+    e.preventDefault();
     isRunning = !isRunning;
     break;
     case 37:
-    player.position.x += 0.5; 
     break;
     case 39:
-    player.position.x -= 0.5; 
     break;
     case 38:
-    player.position.z += 0.5; 
     break;
     case 40:
-    player.position.z -= 0.5; 
     break;
     default : 
     console.log(e.keyCode);
