@@ -8,69 +8,35 @@ var cnt  = 0,
     orbitRadius = 9,
     isRunning = true,
     fallingCubes = [],
-    player,
     RED = new THREE.Color(1,0,0),
     GREEN = new THREE.Color(0,1,0),
     point = 0,
-    cubeSize = 1,
-    cubeMargin = 0.2,
+    cubeSize = 0.5,
+    cubeMargin = 0.05,
     pointView,
-    tetriminoList = new Array()
+    tetriminoList = new Array(),
+   targetIndex = -1 
 ;
+var unitLength = cubeMargin + cubeSize;
 
 var TETRIMINO = {
- "I" : [
-  [1,1],
-  [2,1],
-  [3,1],
-  [4,1]
- ],
- "O" : [
-  [1,1],
-  [1,2],
-  [2,1],
-  [2,2]
- ],
- "S" : [
-  [1,1],
-  [2,1],
-  [2,2],
-  [3,2]
- ],
- "Z" : [
-  [1,2],
-  [2,2],
-  [2,1],
-  [3,1]
- ],
- "J" : [
-  [1,2],
-  [1,1],
-  [2,1],
-  [3,1]
- ],
- "L" : [
-  [1,1],
-  [2,1],
-  [3,1],
-  [3,2]
- ],
- "T" : [
-  [1,1],
-  [2,1],
-  [2,2],
-  [3,1]
- ]
+  "I" : [[1,1],    [2,1],    [3,1],    [4,1]],
+  "O" : [[1,1],    [1,2],    [2,1],    [2,2]],
+  "S" : [[1,1],    [2,1],    [2,2],    [3,2]],
+  "Z" : [[1,2],    [2,2],    [2,1],    [3,1]],
+  "J" : [[1,2],    [1,1],    [2,1],    [3,1]],
+  "L" : [[1,1],    [2,1],    [3,1],    [3,2]],
+  "T" : [[1,1],    [2,1],    [2,2],    [3,1]]
 };
 
 var TETRIMINO_COLOR = {
- "I":"cyan",
- "O":"yellow",
- "S":"green",
- "Z":"red",
- "J":"blue",
- "L": "orange",
- "T":"purple"
+  "I":"cyan",
+  "O":"yellow",
+  "S":"green",
+  "Z":"red",
+  "J":"blue",
+  "L": "orange",
+  "T":"purple"
 };
 
 function main(){
@@ -90,7 +56,29 @@ function Tetrimino(type,spawnPoint){
     positions[i][1]+= spawnPoint.y;
   }
   this.cubes = addCubes(positions,cubeGeo, material);
+  targetIndex++;
 }
+
+Tetrimino.prototype = {
+  fall : function(){
+    for(i in this.cubes){
+      this.cubes[i].position.y -= unitLength;
+    }
+  },
+  moveRight: function(){
+    for(i in this.cubes){
+      this.cubes[i].position.x += unitLength;
+    }
+  },
+  moveLeft : function(){
+    for(i in this.cubes){
+      this.cubes[i].position.x -= unitLength;
+    }
+  },
+  rotate : function (clockwise){/* clockwise : boolean */
+
+  }
+};
 
 function addCube(position,geometry,material){
   var cube =  new THREE.Mesh( geometry, material.clone() );
@@ -116,17 +104,15 @@ function respawn(cube){
 
 function addCubes(positions, geometry, material){
   var cubes = [];
-  var unitLength = cubeMargin + cubeSize;
   for(i in positions){
     var pos = positions[i];
     var x = pos[0] * unitLength;
     var y = pos[1] * unitLength;
-    console.log(x,y);
     var cube =  addCube(
       {x:x, y:y, z:1},
-        geometry, material);
-     cube.userData = {x: pos[0], y:pos[1]};
-     cubes.push(cube);
+      geometry, material);
+    cube.userData = {x: pos[0], y:pos[1]};
+    cubes.push(cube);
   }
   return cubes;
 }
@@ -139,7 +125,7 @@ function init(){
   material = new THREE.MeshLambertMaterial( { color: 0xffffff } );
 
   var light  = new THREE.DirectionalLight( 0xffffff ,1.0);
-  light.position.set(1,3,1);
+  light.position.set(1,3,2);
 
   var groundGemetry = new THREE.PlaneGeometry(10,10);
   ground = new THREE.Mesh(groundGemetry, material);
@@ -148,13 +134,8 @@ function init(){
 
   lookat= new THREE.Vector3(0,1,0);
 
-  
-  tetriminoList.push(new Tetrimino("I",{x:-2,y:2}));
-  tetriminoList.push(new Tetrimino("Z",{x:-2,y:3}));
-  tetriminoList.push(new Tetrimino("S",{x:-1,y:0}));
-  tetriminoList.push(new Tetrimino("O",{x:2,y:-1}));
-  tetriminoList.push(new Tetrimino("L",{x:-1,y:-1}));
-  tetriminoList.push(new Tetrimino("T",{x:-4,y:-1}));
+
+  tetriminoList.push(new Tetrimino("T",{x:0,y:6}));
 
   scene.add(ground);
   scene.add(light);
@@ -187,12 +168,15 @@ function onkeydown(e){
     isRunning = !isRunning;
     break;
     case 37:
+    tetriminoList[targetIndex].moveLeft();
     break;
     case 39:
+    tetriminoList[targetIndex].moveRight();
     break;
     case 38:
     break;
     case 40:
+    tetriminoList[targetIndex].fall();
     break;
     default : 
     console.log(e.keyCode);
