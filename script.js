@@ -39,6 +39,7 @@ var TETRIMINO_COLOR = {
   "L": "orange",
   "T":"purple"
 };
+var TETRIMINO_TYPES = ["I","O","S","Z","J","L","T"];
 
 function main(){
   document.body.onkeydown = onkeydown; 
@@ -91,6 +92,14 @@ Tetrimino.prototype = {
       positions.push(this.cubes[i].position);
     }
     return positions;
+  },
+  isGroundLevel : function(){
+    for(i in this.cubes){
+      if(this.cubes[i].position.y - unitLength <= GROUND_LEVEL){
+        return true;
+      };
+    }
+    return false;
   }
 };
 
@@ -131,6 +140,12 @@ function addCubes(positions, geometry, material){
   return cubes;
 }
 
+function addTetrimino(type){
+  type = type || TETRIMINO_TYPES[Math.floor(Math.random()*TETRIMINO_TYPES.length)];
+  console.log(type);
+  tetriminoList.push(new Tetrimino(type,{x:0,y:6}));
+}
+
 function init(){
   renderer.setSize( WIDTH, HEIGHT);
   document.body.appendChild( renderer.domElement );
@@ -148,7 +163,7 @@ function init(){
 
   lookat= new THREE.Vector3(0,1,0);
 
-  tetriminoList.push(new Tetrimino("T",{x:0,y:6}));
+  addTetrimino("I");
 
   scene.add(ground);
   scene.add(light);
@@ -189,7 +204,11 @@ function onkeydown(e){
     case 38:
     break;
     case 40:
-    tetriminoList[targetIndex].fall();
+    if(tetriminoList[targetIndex].isGroundLevel()){
+      addTetrimino();
+    }else{
+      tetriminoList[targetIndex].fall();
+    }
     break;
     default : 
     console.log(e.keyCode);
