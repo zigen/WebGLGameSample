@@ -5,7 +5,7 @@ var camera = new THREE.PerspectiveCamera( 75, WIDTH/HEIGHT, 0.1, 1000 );
 var renderer = new THREE.WebGLRenderer();
 
 var cnt  = 0,
-    orbitRadius = 9,
+    orbitRadius = 12,
     isRunning = true,
     fallingCubes = [],
     RED = new THREE.Color(1,0,0),
@@ -16,7 +16,10 @@ var cnt  = 0,
     pointView,
     tetriminoList = new Array(),
     targetIndex = -1 ,
-    GROUND_LEVEL= 0
+    GROUND_LEVEL= 0,
+    LEFT_BOUND = -5,
+    RIGHT_BOUND = 5,
+    SPAWN_POINT = {x:0, y:20}
 ;
 var unitLength = cubeMargin + cubeSize;
 
@@ -98,14 +101,30 @@ Tetrimino.prototype = {
   getPositions : function(){
     var positions = [];
     for(i in this.cubes){
-     var pos = this.cubes[i].userData.pos;
-     positions.push({x:pos.x, y:pos.y})
+      var pos = this.cubes[i].userData.pos;
+      positions.push({x:pos.x, y:pos.y})
     }
     return positions;
   },
   isGroundLevel : function(){
     for(i in this.cubes){
       if(this.cubes[i].position.y - unitLength <= GROUND_LEVEL){
+        return true;
+      };
+    }
+    return false;
+  },
+  isOutOfRightBound: function(){
+    for(i in this.cubes){
+      if(this.cubes[i].position.x + unitLength >= RIGHT_BOUND ){
+        return true;
+      };
+    }
+    return false;
+  },
+  isOutOfLeftBound: function(){
+    for(i in this.cubes){
+      if(this.cubes[i].position.x - unitLength <= LEFT_BOUND ){
         return true;
       };
     }
@@ -119,24 +138,43 @@ function isHit(positions1, positions2){
     for(j in positions2){
       var p2 = positions2[j];
       if(p1.x == p2.x && p1.y == p2.y)return true;
-      }
+    }
   }
   return false;
 }
 
 function collisionCheck(dx,dy){
- var selected = tetriminoList[targetIndex].getPositions();
- for(i in selected){
-selected[i].x += dx;
-selected[i].y += dy;
-}
- if(targetIndex == 0)return false;
+  var selected = tetriminoList[targetIndex].getPositions();
+  for(i in selected){
+    selected[i].x += dx;
+    selected[i].y += dy;
+  }
+  if(targetIndex == 0)return false;
   for(i in tetriminoList){
     if(i != targetIndex){
-     if(isHit(selected ,tetriminoList[i].getPositions()))return true;
+      if(isHit(selected ,tetriminoList[i].getPositions()))return true;
     }
   }
   return false;
+}
+
+function isMoveableTo(dx,dy){
+  var target = tetriminoList[targetIndex];
+
+  if( dx > 0){ // move right
+    if(target.isOutOfRightBound()){
+      return false;
+    }
+  }
+
+  if(dx < 0){// move left
+    if(target.isOutOfLeftBound()){
+      return false;
+    }
+  }
+
+  if(collisionCheck(dx,dy))return false;
+  return true;
 }
 
 function addCube(position,geometry,material){
@@ -178,7 +216,7 @@ function addCubes(positions, geometry, material){
 
 function addTetrimino(type){
   type = type || TETRIMINO_TYPES[Math.floor(Math.random()*TETRIMINO_TYPES.length)];
-  tetriminoList.push(new Tetrimino(type,{x:0,y:6}));
+  tetriminoList.push(new Tetrimino(type, SPAWN_POINT));
 }
 
 function init(){
@@ -196,7 +234,7 @@ function init(){
   ground.rotateX(-Math.PI * 0.5);
   ground.position.set(0,-0.5,0);
 
-  lookat= new THREE.Vector3(0,1,0);
+  lookat= new THREE.Vector3(0,7,0);
 
   addTetrimino("I");
 
@@ -231,15 +269,15 @@ function onkeydown(e){
     isRunning = !isRunning;
     break;
     case 37:
-    if(!collisionCheck(-1,0))tetriminoList[targetIndex].moveLeft();
+    if(isMoveableTo(-1,0))tetriminoList[targetIndex].moveLeft();
     break;
     case 39:
-    if(!collisionCheck(1,0))tetriminoList[targetIndex].moveRight();
+    if(isMoveableTo(1,0))tetriminoList[targetIndex].moveRight();
     break;
     case 38:
     break;
     case 40:
-    if(tetriminoList[targetIndex].isGroundLevel() || collisionCheck(0,-1)){
+    if(tetriminoList[targetIndex].isGroundLevel() || !isMoveableTo(0,-1)){
       addTetrimino();
     }else{
       tetriminoList[targetIndex].fall();
