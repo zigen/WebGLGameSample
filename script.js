@@ -15,7 +15,8 @@ var cnt  = 0,
     cubeMargin = 0.05,
     pointView,
     tetriminoList = new Array(),
-   targetIndex = -1 
+    targetIndex = -1 ,
+    GROUND_LEVEL= 0
 ;
 var unitLength = cubeMargin + cubeSize;
 
@@ -62,6 +63,12 @@ function Tetrimino(type,spawnPoint){
 Tetrimino.prototype = {
   fall : function(){
     for(i in this.cubes){
+      if(this.cubes[i].position.y - unitLength <= GROUND_LEVEL){
+        console.log("Reach the Ground level"); 
+        return ;
+      };
+    }
+    for(i in this.cubes){
       this.cubes[i].position.y -= unitLength;
     }
   },
@@ -77,6 +84,13 @@ Tetrimino.prototype = {
   },
   rotate : function (clockwise){/* clockwise : boolean */
 
+  },
+  getPositions : function(){
+    var positions = [];
+    for(i in this.cubes){
+      positions.push(this.cubes[i].position);
+    }
+    return positions;
   }
 };
 
@@ -133,7 +147,6 @@ function init(){
   ground.position.set(0,-0.5,0);
 
   lookat= new THREE.Vector3(0,1,0);
-
 
   tetriminoList.push(new Tetrimino("T",{x:0,y:6}));
 
