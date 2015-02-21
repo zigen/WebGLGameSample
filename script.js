@@ -72,15 +72,24 @@ Tetrimino.prototype = {
     for(i in this.cubes){
       this.cubes[i].position.y -= unitLength;
     }
+    this._moveInternalPos(0,-1);
   },
   moveRight: function(){
     for(i in this.cubes){
       this.cubes[i].position.x += unitLength;
     }
+    this._moveInternalPos(1,0);
   },
   moveLeft : function(){
     for(i in this.cubes){
       this.cubes[i].position.x -= unitLength;
+    }
+    this._moveInternalPos(-1,0);
+  },
+  _moveInternalPos : function(dx,dy){
+    for(i in this.cubes){
+      this.cubes[i].userData.pos.x += dx;
+      this.cubes[i].userData.pos.y += dy;
     }
   },
   rotate : function (clockwise){/* clockwise : boolean */
@@ -89,7 +98,8 @@ Tetrimino.prototype = {
   getPositions : function(){
     var positions = [];
     for(i in this.cubes){
-      positions.push(this.cubes[i].position);
+     var pos = this.cubes[i].userData.pos;
+     positions.push({x:pos.x, y:pos.y})
     }
     return positions;
   },
@@ -102,6 +112,32 @@ Tetrimino.prototype = {
     return false;
   }
 };
+
+function isHit(positions1, positions2){
+  for(i in positions1){
+    var p1 = positions1[i];
+    for(j in positions2){
+      var p2 = positions2[j];
+      if(p1.x == p2.x && p1.y == p2.y)return true;
+      }
+  }
+  return false;
+}
+
+function collisionCheck(dx,dy){
+ var selected = tetriminoList[targetIndex].getPositions();
+ for(i in selected){
+selected[i].x += dx;
+selected[i].y += dy;
+}
+ if(targetIndex == 0)return false;
+  for(i in tetriminoList){
+    if(i != targetIndex){
+     if(isHit(selected ,tetriminoList[i].getPositions()))return true;
+    }
+  }
+  return false;
+}
 
 function addCube(position,geometry,material){
   var cube =  new THREE.Mesh( geometry, material.clone() );
@@ -134,7 +170,7 @@ function addCubes(positions, geometry, material){
     var cube =  addCube(
       {x:x, y:y, z:1},
       geometry, material);
-    cube.userData = {x: pos[0], y:pos[1]};
+    cube.userData.pos = {x: pos[0], y:pos[1]};
     cubes.push(cube);
   }
   return cubes;
@@ -142,7 +178,6 @@ function addCubes(positions, geometry, material){
 
 function addTetrimino(type){
   type = type || TETRIMINO_TYPES[Math.floor(Math.random()*TETRIMINO_TYPES.length)];
-  console.log(type);
   tetriminoList.push(new Tetrimino(type,{x:0,y:6}));
 }
 
@@ -171,7 +206,7 @@ function init(){
 
 }
 
-function update(){
+function fixedUpdate(){
   if(!isRunning)return ;
   camera.position.x = Math.sin(cnt) * orbitRadius;
   camera.position.z = Math.cos(cnt) * orbitRadius;
@@ -184,7 +219,7 @@ function update(){
 }
 
 function render(){
-  update();
+  fixedUpdate();
   requestAnimationFrame( render );
   renderer.render( scene, camera );
 }
@@ -196,15 +231,15 @@ function onkeydown(e){
     isRunning = !isRunning;
     break;
     case 37:
-    tetriminoList[targetIndex].moveLeft();
+    if(!collisionCheck(-1,0))tetriminoList[targetIndex].moveLeft();
     break;
     case 39:
-    tetriminoList[targetIndex].moveRight();
+    if(!collisionCheck(1,0))tetriminoList[targetIndex].moveRight();
     break;
     case 38:
     break;
     case 40:
-    if(tetriminoList[targetIndex].isGroundLevel()){
+    if(tetriminoList[targetIndex].isGroundLevel() || collisionCheck(0,-1)){
       addTetrimino();
     }else{
       tetriminoList[targetIndex].fall();
