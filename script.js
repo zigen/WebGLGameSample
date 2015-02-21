@@ -14,8 +14,64 @@ var cnt  = 0,
     point = 0,
     cubeSize = 1,
     cubeMargin = 0.2,
-    pointView
+    pointView,
+    tetriminoList = new Array()
 ;
+
+var TETRIMINO = {
+ "I" : [
+  [1,1],
+  [2,1],
+  [3,1],
+  [4,1]
+ ],
+ "O" : [
+  [1,1],
+  [1,2],
+  [2,1],
+  [2,2]
+ ],
+ "S" : [
+  [1,1],
+  [2,1],
+  [2,2],
+  [3,2]
+ ],
+ "Z" : [
+  [1,2],
+  [2,2],
+  [2,1],
+  [3,1]
+ ],
+ "J" : [
+  [1,2],
+  [1,1],
+  [2,1],
+  [3,1]
+ ],
+ "L" : [
+  [1,1],
+  [2,1],
+  [3,1],
+  [3,2]
+ ],
+ "T" : [
+  [1,1],
+  [2,1],
+  [2,2],
+  [3,1]
+ ]
+};
+
+var TETRIMINO_COLOR = {
+ "I":"cyan",
+ "O":"yellow",
+ "S":"green",
+ "Z":"red",
+ "J":"blue",
+ "L": "orange",
+ "T":"purple"
+};
 
 function main(){
   document.body.onkeydown = onkeydown; 
@@ -25,6 +81,16 @@ function main(){
 }
 
 
+function Tetrimino(type,spawnPoint){
+  var material = new THREE.MeshLambertMaterial( { color: TETRIMINO_COLOR[type]} );
+  var cubeGeo = new THREE.BoxGeometry( cubeSize, cubeSize, cubeSize);
+  var positions = TETRIMINO[type];
+  for(i in positions){
+    positions[i][0]+= spawnPoint.x;
+    positions[i][1]+= spawnPoint.y;
+  }
+  this.cubes = addCubes(positions,cubeGeo, material);
+}
 
 function addCube(position,geometry,material){
   var cube =  new THREE.Mesh( geometry, material.clone() );
@@ -56,11 +122,12 @@ function addCubes(positions, geometry, material){
     var x = pos[0] * unitLength;
     var y = pos[1] * unitLength;
     console.log(x,y);
-    cubes.push( addCube(
+    var cube =  addCube(
       {x:x, y:y, z:1},
-        geometry, material));
+        geometry, material);
+     cube.userData = {x: pos[0], y:pos[1]};
+     cubes.push(cube);
   }
-  console.log(cubes);
   return cubes;
 }
 
@@ -69,7 +136,7 @@ function init(){
   document.body.appendChild( renderer.domElement );
 
   var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-  var material = new THREE.MeshLambertMaterial( { color: 0xffffff } );
+  material = new THREE.MeshLambertMaterial( { color: 0xffffff } );
 
   var light  = new THREE.DirectionalLight( 0xffffff ,1.0);
   light.position.set(1,3,1);
@@ -79,15 +146,15 @@ function init(){
   ground.rotateX(-Math.PI * 0.5);
   ground.position.set(0,-0.5,0);
 
+  lookat= new THREE.Vector3(0,1,0);
 
-  lookat= new THREE.Vector3(0,0,0);
-
-  addCubes([
-      [1,1],
-      [3,2],
-      [2,3],
-      [1,4]
-  ],geometry, material);
+  
+  tetriminoList.push(new Tetrimino("I",{x:-2,y:2}));
+  tetriminoList.push(new Tetrimino("Z",{x:-2,y:3}));
+  tetriminoList.push(new Tetrimino("S",{x:-1,y:0}));
+  tetriminoList.push(new Tetrimino("O",{x:2,y:-1}));
+  tetriminoList.push(new Tetrimino("L",{x:-1,y:-1}));
+  tetriminoList.push(new Tetrimino("T",{x:-4,y:-1}));
 
   scene.add(ground);
   scene.add(light);
