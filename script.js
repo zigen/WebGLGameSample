@@ -13,6 +13,30 @@ var cuttingHeight = 0,
     cuttingHeightOffset = -0.5;
 var cuttingPlane = new THREE.Plane(new THREE.Vector3(0,-1,0), 0);
 var lines = [];
+var cubeEdges = new THREE.Group();
+
+function SlicedEdges(){
+ var slicedGroups = [];
+
+ function push(){
+
+ }
+
+ function showLayer(layer){
+  
+ }
+
+ function hideLayer(layer){
+
+ }
+ return {
+    push:push,
+    showLayer:showLayer,
+    hideLayer:hideLayer,
+ };
+}
+
+
 
 function main(){
   document.body.onkeydown = onkeydown; 
@@ -23,6 +47,29 @@ function main(){
 function setCuttingHeight(h){
   cuttingHeight = h;
   cuttingPlane = new THREE.Plane(new THREE.Vector3(0,-1,0), cuttingHeight + cuttingHeightOffset);
+}
+
+function enchantElement(title, obj){
+ ( function(){
+  var _el = document.createElement("input");
+  var _isHide = false;
+  var _title = title;
+  var _obj = obj;
+  _el.value = title;
+  _el.type = "button";
+  scene.add(_obj);
+
+  _el.onclick = function(){
+   console.log(_el.value);
+    if(_isHide){
+      scene.add(_obj);
+    } else {
+      scene.remove(_obj);
+    } 
+    _isHide = !_isHide;
+  };
+  document.body.appendChild(_el);
+  })();
 }
 
 function init(){
@@ -47,7 +94,6 @@ function init(){
   cubePoint = new THREE.Vector3(0,1.5,0);
   cube.position.set(0,0,0);
 
-  scene.add( cube );
   scene.add(ground);
   scene.add(light);
   camera.position.z = 5;
@@ -55,8 +101,13 @@ function init(){
   scene.add( axisHelper );
 
   edges = new THREE.EdgesHelper( cube, 0x00ff00 );
-  scene.add(edges);
-  computeIntersectEdge(cube);
+
+  enchantElement("Cube",cube);
+  enchantElement("CubeFrame",cubeEdges);
+
+  for(var h = 0; h < 2; h+=0.1){
+    computeIntersectEdge(cube, h);
+  }
 }
 
 function genLine(v1,v2,color){
@@ -69,8 +120,8 @@ function genLine(v1,v2,color){
   geometry.vertices.push(v1,v2);
 
   var line = new THREE.Line( geometry, material );
-  lines.push(line);
   scene.add( line );
+  return line;
 }
 
 
@@ -98,7 +149,7 @@ function remove_if (ar,fn){
   return _res;
 }
 
-function computeIntersectEdge(obj){
+function computeIntersectEdge(obj,height){
   var vertices = obj.geometry.vertices,
       faces = obj.geometry.faces
         ;
@@ -107,18 +158,16 @@ function computeIntersectEdge(obj){
       _vertices.push( vertices[faces[faceIndex].a] );
       _vertices.push( vertices[faces[faceIndex].b] );
       _vertices.push( vertices[faces[faceIndex].c] );
-      genLine(_vertices[0],_vertices[1]);
-      genLine(_vertices[1],_vertices[2]);
-      genLine(_vertices[2],_vertices[0]);
 
-      setCuttingHeight(cuttingHeight = 0);
-      while(cuttingHeight < 10){
-        setCuttingHeight(cuttingHeight += 0.05);
+     cubeEdges.add( genLine(_vertices[0],_vertices[1]));
+     cubeEdges.add( genLine(_vertices[1],_vertices[2]));
+      cubeEdges.add(genLine(_vertices[2],_vertices[0]));
+
+        setCuttingHeight(height);
         var _intersectPoints = genLineOnPlaneAndTriangle(_vertices[0],_vertices[1],_vertices[2],cuttingPlane);
         if(_intersectPoints.length == 2){
           genLine(_intersectPoints[0], _intersectPoints[1], 0x0000ff);
         }
-      }
   }
 }
 
